@@ -1,6 +1,11 @@
 {
   "sourceRoot": "src",
   "presets": [
-    "./build/babel-preset"
+    [
+      "babel-preset-ui5-next",
+      {
+        "namespace": "<%= namespace %>"
+      }
+    ]
   ]
 }

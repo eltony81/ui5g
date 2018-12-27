@@ -1,8 +1,21 @@
-import ComponentContainer from "sap/ui/core/ComponentContainer";
-import Component from "./Component";
+sap.ui.getCore().attachInit(function() {
 
-sap.ui.getCore().boot();
+  var oCompContainer = new sap.ui.core.ComponentContainer({
+    height: "100%"
+  })
 
-var container = new ComponentContainer({ component: new Component() });
+  new sap.m.Shell({
+    app: oCompContainer,
+    showLogout: true,
+    appWidthLimited: true
+  }).placeAt("content");
 
-container.placeAt("content");
+  var oComponent = sap.ui.component({
+    name: "<%= namespace %>",
+    manifestFirst: true,
+    async: true
+  }).then(function(oComponent) {
+    oCompContainer.setComponent(oComponent);
+  });
+
+});

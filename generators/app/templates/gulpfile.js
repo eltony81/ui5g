@@ -6,10 +6,11 @@ var eslint = require('gulp-eslint');
 var merge = require('merge-stream');
 var browserSync = require("browser-sync");
 var GulpMem = require('gulp-mem');
-var less = require('gulp-less');
+var sass = require('gulp-sass');
 var del = require('del');
 var filter = require('gulp-filter');
 var console = require('console');
+var replace = require('gulp-string-replace');
 
 var SRC_ROOT = "./src";
 var DEST_ROOT = "./dist";
@@ -18,6 +19,8 @@ var gulpMem = new GulpMem();
 gulpMem.serveBasePath = DEST_ROOT;
 gulpMem.enableLog = false;
 
+var PROD_CACHE_STRATEGY = true;
+
 var buildJs = () => {
   // use to avoid an error cause whole gulp failed
   var b = babel()
@@ -25,26 +28,34 @@ var buildJs = () => {
       console.log(e.stack);
       b.end();
     });
-  return gulp.src([`${SRC_ROOT}/**/*.js`, `!${SRC_ROOT}/**/lib/*.js`])
+  return gulp.src([`${SRC_ROOT}/**/*.js`, `!${SRC_ROOT}/**/lib/*.js`, `!${SRC_ROOT}/index.js`, `!${SRC_ROOT}/service-worker.js`, `!${SRC_ROOT}/register-worker.js`])
     .pipe(sourcemaps.init())
     .pipe(b)
     .pipe(sourcemaps.write('/sourcemap'));
 };
 
+sass.compiler = require('node-sass');
 var buildCss = () => {
-  return gulp.src(`${SRC_ROOT}/**/css/*.less`, { base: `${SRC_ROOT}` })
-    .pipe(less());
+  return gulp.src(`${SRC_ROOT}/**/css/*.scss`, { base: `${SRC_ROOT}` })
+    .pipe(sass().on('error', sass.logError));
+};
+
+var buildServiceWorker = () => {
+  return gulp.src([`${SRC_ROOT}/**/service-worker.js`, `${SRC_ROOT}/**/register-worker.js`], { base: `${SRC_ROOT}` })
+    .pipe(replace(/\$\{cache\.manifest\.version\}/, Date.now()))
+    .pipe(replace(/\/\/\$\{prod\.cache\.strategy}/, "TEMPORARY_CACHE_STRATEGY = " + (!PROD_CACHE_STRATEGY).toString() + ";"));
+
 };
 
 var copy = () => {
   return merge(
-    gulp.src([`${SRC_ROOT}/**/*`, `!${SRC_ROOT}/**/*.js`, `!${SRC_ROOT}/**/*.less`], { base: `${SRC_ROOT}` }),
+    gulp.src([`${SRC_ROOT}/**/*`, `!${SRC_ROOT}/**/*.js`, `!${SRC_ROOT}/**/*.scss`, `${SRC_ROOT}/index.js`,], { base: `${SRC_ROOT}` }),
     gulp.src([`${SRC_ROOT}/**/lib/*`], { base: `${SRC_ROOT}` })
   );
 };
 
 var build = () => {
-  return merge(copy(), buildJs(), buildCss());
+  return merge(copy(), buildJs(), buildCss(), buildServiceWorker());
 };
 
 gulp.task('clean', () => del(DEST_ROOT));
@@ -54,10 +65,18 @@ gulp.task('build:mem', () => {
     .pipe(gulpMem.dest(DEST_ROOT));
 });
 
+gulp.task('build:pwamem', () => {
+  return build()
+    .pipe(gulp.dest(DEST_ROOT))
+    .pipe(filter(['**/*.js', '**/*.xml', '**/*.css', '**/*.properties', '!**/images/*.*', '!**/lib/*']))
+    .pipe(ui5preload({ base: `${DEST_ROOT}`, namespace: '<%= namespace %>' }))
+    .pipe(gulpMem.dest(DEST_ROOT));
+});
+
 gulp.task('build', () => {
   return build()
     .pipe(gulp.dest(DEST_ROOT))
-    .pipe(filter(['**/*.js', '**/*.xml', '!**/lib/*']))
+    .pipe(filter(['**/*.js', '**/*.xml', '**/*.css', '**/*.properties', '!**/images/*.*', '!**/lib/*']))
     .pipe(ui5preload({ base: `${DEST_ROOT}`, namespace: '<%= namespace %>' }))
     .pipe(gulp.dest(`${DEST_ROOT}`));
 });
@@ -104,6 +123,10 @@ gulp.task('watch:mem', () => {
   gulp.watch(`${SRC_ROOT}/**/*`, gulp.series(['build:mem', 'reload']));
 });
 
+gulp.task('watch:pwamem', () => {
+  gulp.watch(`${SRC_ROOT}/**/*`, gulp.series(['build:pwamem', 'reload']));
+});
+
 gulp.task('live-build', gulp.series('build', 'bs'), () => {
   gulp.watch(`${SRC_ROOT}/**/*`, () => gulp.series('build', 'reload'));
 });
@@ -120,3 +143,4 @@ gulp.task('default', gulp.series('clean', 'build:mem', gulp.parallel('bs', 'watc
 
 gulp.task('test', gulp.series(['clean', 'build:mem', 'bs:test', 'watch:mem']));
 
+gulp.task('testpwa', gulp.series('clean', 'build:pwamem', gulp.parallel('bs', 'watch:pwamem')));

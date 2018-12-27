@@ -2,17 +2,25 @@
 <html>
 
 <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta charset="utf-8">
-    <title>
-        <%= name %>
-    </title>
-    <script id="sap-ui-bootstrap" src="https://<%= ui5Domain %>/resources/sap-ui-core.js" data-sap-ui-theme="sap_belize"
-        data-sap-ui-libs="sap.m" data-sap-ui-compatVersion="edge" data-sap-ui-preload="async" data-sap-ui-resourceroots='{
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="utf-8">
+  <meta name="theme-color" content="#1f4fa3">
+  <meta name="Description" content="<%= description %>">
+  <link rel="manifest" href="pwamanifest.json">
+  <title>
+    <%= name %>
+  </title>
+  <noscript>
+    <a href="https://www.mozilla.com/">No script link</a>
+  </noscript>
+  <script id="sap-ui-bootstrap" src="https://<%= ui5Domain %>/resources/sap-ui-core.js" data-sap-ui-theme="sap_belize"
+    data-sap-ui-xx-waitForTheme="true" data-sap-ui-xx-supportedLanguages="default" data-sap-ui-libs="sap.m"
+    data-sap-ui-compatVersion="edge" data-sap-ui-preload="async" data-sap-ui-resourceroots='{
 			"<%= namespace %>": "."
 		}'>
-        </script>
-    <script src="./index.js"></script>
+    </script>
+  <script src="./register-worker.js"></script>
+  <script src="./index.js"></script>
 </head>
 
 <body class="sapUiBody" id="content">

@@ -1,10 +1,10 @@
 {
-  "name": "generator-ui5g",
-  "version": "1.2.0",
-  "description": "Basic generator for sapui5/openui5",
+  "name": "generator-ui5gtny",
+  "version": "0.1.1",
+  "description": "Basic generator for openui5",
   "author": {
-    "name": "Theo Sun",
-    "email": "theo.sun@sap.com"
+    "name": "Antonio Di Fluri",
+    "email": "antonio.difluri@gmail.com"
   },
   "files": [
     "generators"
@@ -41,6 +41,6 @@
       "node": true
     }
   },
-  "repository": "https://github.com/Soontao/ui5g",
+  "repository": "https://github.com/eltony81/ui5gtny",
   "license": "MIT"
 }

@@ -1,4 +1,3 @@
-
 const Generator = require('yeoman-generator');
 const chalk = require('chalk');
 const yosay = require('yosay');
@@ -8,21 +7,27 @@ const mkdirp = require('mkdirp');
 
 module.exports = class extends Generator {
   prompting() {
-    // Have Yeoman greet the user.
+    /* Have Yeoman greet the user.*/
     this.log(yosay(
-      'Welcome to the ' + chalk.red('generator-ui5g') + ' generator!'
+      'Welcome to the ' + chalk.green('ADF') + " -- " + chalk.red('generator-ui5gtny') + ' generator!'
     ));
 
     const prompts = [{
       type: 'input',
       name: 'name',
       message: 'App name',
-      "default": 'ui5-workthrough'
+      "default": 'ui5AppDemo'
     }, {
       type: 'input',
       name: 'namespace',
       message: 'App namespace',
-      "default": 'ui5.demo.walkthrough'
+      "default": 'ui5.app.demo'
+    },
+    {
+      type: 'input',
+      name: 'description',
+      message: 'App description',
+      "default": 'Simple App Demo Skeleton'
     },
     {
       type: 'list',
@@ -44,6 +49,7 @@ module.exports = class extends Generator {
   }
 
   writing() {
+    this.props.timestamp = (new Date()).getTime();
     const targetPathRoot = path.join(process.cwd(), this.props.dir);
     this.destinationRoot(targetPathRoot);
     mkdirp(targetPathRoot, () => {
