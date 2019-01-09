@@ -14,6 +14,7 @@ var replace = require('gulp-string-replace');
 
 var SRC_ROOT = "./src";
 var DEST_ROOT = "./dist";
+var UI5LIB_ROOT = "./ui5lib";
 
 var gulpMem = new GulpMem();
 gulpMem.serveBasePath = DEST_ROOT;
@@ -58,6 +59,14 @@ var build = () => {
   return merge(copy(), buildJs(), buildCss(), buildServiceWorker());
 };
 
+var copyui5lib = () => {
+	return gulp.src(`${UI5LIB_ROOT}/**/*`, { base: './' }).pipe(gulp.dest(DEST_ROOT));
+};
+
+var buildWithLib = () => {
+  return merge(copyui5lib(), copy(), buildJs(), buildCss(), buildServiceWorker());
+};
+
 gulp.task('clean', () => del(DEST_ROOT));
 
 gulp.task('build:mem', () => {
@@ -68,30 +77,32 @@ gulp.task('build:mem', () => {
 gulp.task('build:pwamem', () => {
   return build()
     .pipe(gulp.dest(DEST_ROOT))
-    .pipe(filter(['**/*.js', '**/*.xml', '**/*.css', '**/*.properties', '!**/images/*.*', '!**/lib/*']))
+    .pipe(filter(['**/*.js', '**/*.xml', '**/*.css', '**/*.properties', '!**/images/*.*', '!**/lib/*', '!**/ui5lib/*']))
     .pipe(ui5preload({ base: `${DEST_ROOT}`, namespace: '<%= namespace %>' }))
     .pipe(gulpMem.dest(DEST_ROOT));
 });
 
 gulp.task('build', () => {
-  return build()
+  return buildWithLib()
     .pipe(gulp.dest(DEST_ROOT))
-    .pipe(filter(['**/*.js', '**/*.xml', '**/*.css', '**/*.properties', '!**/images/*.*', '!**/lib/*']))
+    .pipe(filter(['**/*.js', '**/*.xml', '**/*.css', '**/*.properties', '!**/images/*.*', '!**/lib/*', '!**/ui5lib/*']))
     .pipe(ui5preload({ base: `${DEST_ROOT}`, namespace: '<%= namespace %>' }))
     .pipe(gulp.dest(`${DEST_ROOT}`));
 });
-
-
 
 gulp.task('bs', () => {
   var middlewares = require('./proxies');
   middlewares.push(gulpMem.middleware);
   browserSync.init({
     server: {
-      baseDir: DEST_ROOT,
+      baseDir: './',
       middleware: middlewares
     },
-    notify: false
+    notify: false,
+	  routes: {
+        '/ui5lib': 'ui5lib',
+		'/': DEST_ROOT
+	  }
   });
 });
 
@@ -100,9 +111,13 @@ gulp.task('bs:test', () => {
   middlewares.push(gulpMem.middleware);
   browserSync.init({
     server: {
-      baseDir: DEST_ROOT,
+      baseDir: './',
       middleware: middlewares,
-      notify: false
+      notify: false,
+	  routes: {
+        '/ui5lib': 'ui5lib',
+		'/<%= namepath %>': DEST_ROOT
+	  }
     },
     startPath: "<%= namepath %>/test/mockServer.html"
   });

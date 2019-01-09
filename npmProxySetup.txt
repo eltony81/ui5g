@@ -1,0 +1,11 @@
+npm config set proxy http://sprite.techedge.corp:3128
+npm config set https-proxy http://sprite.techedge.corp:3128
+
+npm config delete http-proxy
+npm config delete https-proxy
+
+npm config rm proxy
+npm config rm https-proxy
+
+set HTTP_PROXY=null
+set HTTPS_PROXY=null

@@ -4,6 +4,10 @@ const yosay = require('yosay');
 const path = require('path');
 const process = require('process');
 const mkdirp = require('mkdirp');
+const download = require('download');
+const fs = require('fs');
+const extract = require('extract-zip')
+
 
 module.exports = class extends Generator {
   prompting() {
@@ -30,16 +34,10 @@ module.exports = class extends Generator {
       "default": 'Simple App Demo Skeleton'
     },
     {
-      type: 'list',
-      name: 'ui5Domain',
-      message: 'SAPUI5 or OpenUI5?',
-      choices: [{
-        name: 'OpenUI5',
-        value: 'openui5.hana.ondemand.com'
-      }, {
-        name: 'SAPUI5',
-        value: 'sapui5.hana.ondemand.com'
-      }]
+      type: 'input',
+      name: 'libver',
+      message: 'OpenUI5 version?',
+	  "default": '1.61.1'
     }];
     return this.prompt(prompts).then(props => {
       props.dir = props.name.replace(/[^a-zA-Z]/g, '');
@@ -50,7 +48,26 @@ module.exports = class extends Generator {
 
   writing() {
     this.props.timestamp = (new Date()).getTime();
-    const targetPathRoot = path.join(process.cwd(), this.props.dir);
+	let libURL = "https://openui5.hana.ondemand.com/downloads/openui5-runtime-" + this.props.libver + ".zip"
+	const targetPathRoot = path.join(process.cwd(), this.props.dir);
+	download(libURL).then(data => {
+		if (!fs.existsSync("ui5lib")){
+			fs.mkdirSync("ui5lib");
+		}
+		fs.writeFileSync("ui5lib/ui5lib.zip", data);
+		extract("ui5lib/ui5lib.zip", {dir: process.cwd() + "/ui5lib"}, function (err) {
+		    if(err) {
+			    console.error(err);
+			} else {
+				try {
+					fs.unlinkSync("ui5lib/ui5lib.zip");
+					console.log("Successfully deleted ui5lib/ui5lib.zip");
+				} catch (err) {
+					console.error(err);
+				}
+			}
+		});
+	});
     this.destinationRoot(targetPathRoot);
     mkdirp(targetPathRoot, () => {
       this.fs.copyTpl(this.templatePath(), this.destinationPath(), this.props);
