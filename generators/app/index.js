@@ -33,7 +33,7 @@ const extract = require('extract-zip')
 				type: 'input',
 				name: 'libver',
 				message: 'OpenUI5 version?',
-				"default": '1.61.2'
+				"default": '1.52.25'
 			}
 		];
 		return this.prompt(prompts).then(props => {

@@ -1,5 +1,4 @@
-export const formatter = function () {
-  return {
+export default {
     statusText: function (sStatus) {
       var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
 
@@ -15,4 +14,3 @@ export const formatter = function () {
       }
     }
   };
-};

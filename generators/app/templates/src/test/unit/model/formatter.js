@@ -1,13 +1,10 @@
 /*global QUnit*/
 
-sap.ui.require([
-  "<%= namepath%>/model/formatter",
-  "sap/ui/model/resource/ResourceModel",
-  "sap/ui/thirdparty/sinon",
-  "sap/ui/thirdparty/sinon-qunit"
-],
-	function(formatter, ResourceModel) {
-  "use strict";
+  import ResourceModel from "sap/ui/model/resource/ResourceModel";
+  import sinon from "sap/ui/thirdparty/sinon";
+  import sinon_qunit from "sap/ui/thirdparty/sinon-qunit";
+  
+  import formatter from "<%= namepath %>/model/formatter";
 
   QUnit.module("Formatting functions", {
     setup: function() {
@@ -44,5 +41,4 @@ sap.ui.require([
     assert.strictEqual(fnIsolatedFormatter("Foo"), "Foo", "The long text for status Foo is correct");
   });
 
-}
-);
+
